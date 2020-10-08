@@ -56,7 +56,7 @@ contract SupplyChain {
 
   modifier verifyCaller (address _address) { require (msg.sender == _address); _;}
 
-  modifier paidEnough(uint _price) { require(msg.value >= _price); _;}
+  modifier paidEnough(uint _price) { require(msg.value >= _price, "Not paid enough"); _;}
   modifier checkValue(uint _sku) {
     //refund them after pay for item (why it is before, _ checks for logic before func)
     _;
@@ -72,10 +72,10 @@ contract SupplyChain {
    so checking that Item.State == ForSale is not sufficient to check that an Item is for sale.
    Hint: What item properties will be non-zero when an Item has been added?
    */
-  modifier forSale (uint _sku) { require(items[_sku].state == State.ForSale && items[_sku].seller != address(0)); _;}
-  modifier sold (uint _sku) { require(items[_sku].state == State.Sold); _;}
-  modifier shipped (uint _sku) { require(items[_sku].state == State.Shipped); _;}
-  modifier received (uint _sku) { require(items[_sku].state == State.Received); _;}
+  modifier forSale (uint _sku) { require(items[_sku].state == State.ForSale && items[_sku].seller != address(0), "Item not for sale"); _;}
+  modifier sold (uint _sku) { require(items[_sku].state == State.Sold, "Item not sold"); _;}
+  modifier shipped (uint _sku) { require(items[_sku].state == State.Shipped, "Item not shipped"); _;}
+  modifier received (uint _sku) { require(items[_sku].state == State.Received, "Item not received"); _;}
 
 
   constructor() public {
@@ -92,17 +92,9 @@ contract SupplyChain {
     return true;
   }
 
-  /* Add a keyword so the function can be paid. 
-    This function should transfer money to the seller, 
-    set the buyer as the person who called this transaction, 
-    and set the state to Sold. 
-    Be careful, this function should use 3 modifiers to check 
-      if the item is for sale,
-      if the buyer paid enough, 
-      and check the value after the function is called to make sure the buyer is refunded any excess ether sent. 
-
-    Remember to call the event associated with this function!*/
-  function buyItem(uint sku) payable forSale(sku) paidEnough(items[sku].price) checkValue(sku)  
+  /* Add a keyword so the function can be paid.     This function should transfer money to the seller,  set the buyer as the person who called this transaction, 
+    and set the state to Sold. Be careful, this function should use 3 modifiers to check if the item is for sale,if the buyer paid enough, and check the value after the function is called to make sure the buyer is refunded any excess ether sent.  Remember to call the event associated with this function!*/
+  function buyItem(uint sku) payable forSale(sku) paidEnough(items[sku].price) checkValue(sku)
     public 
   {
     Item storage item = items[sku];
@@ -126,6 +118,16 @@ Change the state of the item to shipped. Remember to call the event associated w
     emit  LogShipped(sku);
 }
 
+  function shipItem(address seller, uint sku) sold(sku) 
+    public
+  {
+    Item storage item = items[sku];
+    require(item.seller == seller,"Sender is not the seller");
+
+    item.state = State.Shipped; 
+    emit  LogShipped(sku);
+}
+
   /* Add 2 modifiers to check if the item is shipped already, 
   and that the person calling this function is the buyer. 
   Change the state of the item to received. Remember to call the event associated with this function!*/
@@ -136,9 +138,18 @@ Change the state of the item to shipped. Remember to call the event associated w
     require(msg.sender == item.buyer);
 
     item.state = State.Received;
-  emit LogReceived(sku);
+    emit LogReceived(sku);
+  }
 
-}
+  function receiveItem(address buyer, uint sku) shipped(sku) 
+    public
+  {
+    Item storage item = items[sku];
+    require(buyer == item.buyer,"Receiver is not the buyer");
+
+    item.state = State.Received;
+    emit LogReceived(sku);
+  }
 
   /* We have these functions completed so we can run tests, just ignore it :) */
   function fetchItem(uint _sku) public view returns (string memory name, uint sku, uint price, uint state, address seller, address buyer) {
