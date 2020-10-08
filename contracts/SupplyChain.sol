@@ -118,16 +118,6 @@ Change the state of the item to shipped. Remember to call the event associated w
     emit  LogShipped(sku);
 }
 
-//   function shipItem(address seller, uint sku) sold(sku) 
-//     public
-//   {
-//     Item storage item = items[sku];
-//     require(item.seller == seller,"Sender is not the seller");
-
-//     item.state = State.Shipped; 
-//     emit  LogShipped(sku);
-// }
-
   /* Add 2 modifiers to check if the item is shipped already, 
   and that the person calling this function is the buyer. 
   Change the state of the item to received. Remember to call the event associated with this function!*/
