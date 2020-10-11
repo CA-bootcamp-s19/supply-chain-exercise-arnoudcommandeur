@@ -3,6 +3,7 @@ pragma solidity ^0.5.0;
 import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
 import "../contracts/SupplyChain.sol";
+import "../contracts/ProxySupplyChain.sol";
 
 contract TestSupplyChain {
 
@@ -50,12 +51,19 @@ contract TestSupplyChain {
 
     // shipItem
     // test for calls that are made by not the seller
-    // function testShipItem1() public returns (bool) {
-    //     supplyChain.addItem("Test",1000);        
-    //     supplyChain.buyItem.value(1000)(0);
+    function testShipItem1() public returns (bool) {
+        bool r = false;
 
-    //     supplyChain.shipItem(address(0x8ba6f427D1ACd7167eACB4EDdD4B5a66a47866D1),0);
-    // }
+        ProxySupplyChain Proxy = new ProxySupplyChain(supplyChain);
+
+        supplyChain.addItem("Test",1000);
+        (r, ) = address(supplyChain).call.value(1000)(abi.encodeWithSignature("buyItem(uint256)",0));
+
+        r = Proxy.shipItem(0);
+        Assert.isFalse(r, "If this is true, the contract does not work!");
+
+        return r;
+    }
 
     // shipItem
     // test for trying to ship an item that is not marked Sold
@@ -73,12 +81,19 @@ contract TestSupplyChain {
 
     // receiveItem
     // test calling the function from an address that is not the buyer
-    // function testReceivedItem1() public returns (bool) {
-    //     supplyChain.addItem("Test",1000);        
-    //     supplyChain.buyItem.value(1000)(0);
+    function testReceivedItem1() public returns (bool) {
+        bool r;
+        ProxySupplyChain Proxy = new ProxySupplyChain(supplyChain);
 
-    //     supplyChain.receiveItem(address(0x8ba6f427D1ACd7167eACB4EDdD4B5a66a47866D1),0);
-    // }
+        supplyChain.addItem("Test",1000);        
+        supplyChain.buyItem.value(1000)(0);
+        supplyChain.shipItem(0);
+
+        r = Proxy.receiveItem(0);
+        Assert.isFalse(r, "If this is true, the contract does not work!");
+
+        return r;
+    }
 
     // receiveItem
     // test calling the function on an item not marked Shipped
@@ -91,6 +106,7 @@ contract TestSupplyChain {
         (r, ) = address(supplyChain).call(abi.encodeWithSignature("receiveItem(uint256)",0));
         Assert.isFalse(r, "If this is true, something is broken!");
 
-        return true;
+        return r;
     }
 }
+

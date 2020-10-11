@@ -131,15 +131,15 @@ Change the state of the item to shipped. Remember to call the event associated w
     emit LogReceived(sku);
   }
 
-  function receiveItem(address buyer, uint sku) shipped(sku) 
-    public
-  {
-    Item storage item = items[sku];
-    require(buyer == item.buyer,"Receiver is not the buyer");
+  // function receiveItem(address buyer, uint sku) shipped(sku) 
+  //   public
+  // {
+  //   Item storage item = items[sku];
+  //   require(buyer == item.buyer,"Receiver is not the buyer");
 
-    item.state = State.Received;
-    emit LogReceived(sku);
-  }
+  //   item.state = State.Received;
+  //   emit LogReceived(sku);
+  // }
 
   /* We have these functions completed so we can run tests, just ignore it :) */
   function fetchItem(uint _sku) public view returns (string memory name, uint sku, uint price, uint state, address seller, address buyer) {
