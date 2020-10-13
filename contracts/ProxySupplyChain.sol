@@ -17,7 +17,7 @@ contract ProxySupplyChain {
   }
 
 /* Call Function shipItem from supplyChain contract and return true/false */
-  function shipItem(uint _sku) public returns (bool) 
+  function shipItem(uint _sku) public returns (bool)
   {
     bool r;
 
@@ -28,7 +28,7 @@ contract ProxySupplyChain {
 }
 
 /* Call Function receiveItem from supplyChain contract and return true/false */
-  function receiveItem(uint _sku) public returns (bool) 
+  function receiveItem(uint _sku) public returns (bool)
   {
     bool r;
 
